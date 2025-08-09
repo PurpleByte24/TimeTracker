@@ -1,6 +1,6 @@
 # Folder Time Tracker Extension for VSCodium
 
-[![Version](https://img.shields.io/badge/version-0.0.2-blue.svg)](https://github.com/purplebyte24/timetracker/releases)
+[![Version](https://img.shields.io/badge/version-0.0.4-blue.svg)](https://github.com/purplebyte24/timetracker/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/purplebyte24/timetracker/?tab=MIT-1-ov-file)
 
 
