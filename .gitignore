@@ -4,3 +4,6 @@ out/
 *.log
 *.vsix
 package-lock.json
+.vscode-test.mjs
+.vscodeignore
+eslint.config.mjs

@@ -2,7 +2,7 @@
   "name": "folder-time-tracker",
   "displayName": "folder-time-tracker",
   "description": "Tracks time spent in specified folders",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.102.0"
   },
@@ -15,10 +15,29 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "Folder Time Tracker Configuration",
+      "properties": {
+        "folder-time-tracker.trackedFolders": {
+          "type": "array",
+          "description": "List of absolute folder paths to track.",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        }
+      }
+    },
+
     "commands": [
       {
-        "command": "folder-time-tracker.helloWorld",
-        "title": "Hello World"
+        "command": "folder-time-tracker.addFolder",
+        "title": "Folder Time Tracker: Add Folder"
+      },
+      {
+        "command": "folder-time-tracker.removeFolder",
+        "title": "Folder Time Tracker: Remove Folder"
       }
     ]
   },
