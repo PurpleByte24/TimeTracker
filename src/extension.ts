@@ -14,12 +14,13 @@ interface TrackedFolder {
   lastStart: number | null; // timestamp ms
 }
 
-const IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+const IDLE_TIMEOUT_MS = 5* 60 * 1000;
 
 export function activate(context: vscode.ExtensionContext) {
   const trackedFolders: Map<string, TrackedFolder> = new Map();
   let idleTimer: ReturnType<typeof setTimeout> | undefined;
   let activeFolder: TrackedFolder | null = null;
+  let currentTrackedFolderPath: string | null = null; // remembers which tracked folder is open
 
   const logFolder = path.join(os.homedir(), 'VSCodiumTimeLogs');
   if (!fs.existsSync(logFolder)) {
@@ -100,6 +101,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
     folder.lastStart = Date.now();
     activeFolder = folder;
+    currentTrackedFolderPath = folderPath;
     updateStatusBar();
   }
 
@@ -109,9 +111,9 @@ export function activate(context: vscode.ExtensionContext) {
       activeFolder.timeSpent += now - activeFolder.lastStart;
       activeFolder.lastStart = null;
       saveFolderData(activeFolder);
-      activeFolder = null;
-      updateStatusBar();
     }
+    activeFolder = null;
+    updateStatusBar();
   }
 
   function onIdle() {
@@ -125,11 +127,25 @@ export function activate(context: vscode.ExtensionContext) {
     idleTimer = setTimeout(onIdle, IDLE_TIMEOUT_MS);
   }
 
+  function resetIdleTimerWithResume() {
+    if (!activeFolder) {
+      startTrackingIfFolderOpen();
+    }
+    resetIdleTimer();
+  }
+
   const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
   statusBarItem.tooltip = 'Folder Time Tracker';
   context.subscriptions.push(statusBarItem);
 
   function updateStatusBar() {
+    // No tracked folder open at all → hide status bar
+    if (!currentTrackedFolderPath || !trackedFolderPaths.includes(currentTrackedFolderPath)) {
+      statusBarItem.hide();
+      return;
+    }
+
+    // We have a tracked folder open
     if (activeFolder) {
       let elapsed = activeFolder.timeSpent;
       if (activeFolder.lastStart !== null) {
@@ -141,7 +157,8 @@ export function activate(context: vscode.ExtensionContext) {
       statusBarItem.text = `$(watch) ${hours}h ${minutes}m ${seconds}s`;
       statusBarItem.show();
     } else {
-      statusBarItem.hide();
+      statusBarItem.text = `$(debug-pause) Timer paused`;
+      statusBarItem.show();
     }
   }
 
@@ -152,11 +169,12 @@ export function activate(context: vscode.ExtensionContext) {
       startTracking(folderToTrack);
       resetIdleTimer();
     } else {
+      currentTrackedFolderPath = null;
       stopTracking();
     }
   }
 
-  // New: Periodic saving every 30 seconds
+  // Save periodically every 30 seconds
   setInterval(() => {
     if (activeFolder && activeFolder.lastStart !== null) {
       const now = Date.now();
@@ -166,13 +184,22 @@ export function activate(context: vscode.ExtensionContext) {
     }
   }, 30 * 1000);
 
+  // Activity events to reset/resume
   vscode.window.onDidChangeActiveTextEditor(() => {
-    resetIdleTimer();
+    resetIdleTimerWithResume();
   }, null, context.subscriptions);
 
   vscode.workspace.onDidChangeWorkspaceFolders(() => {
     startTrackingIfFolderOpen();
-    resetIdleTimer();
+    resetIdleTimerWithResume();
+  }, null, context.subscriptions);
+
+  vscode.workspace.onDidChangeTextDocument(() => {
+    resetIdleTimerWithResume();
+  }, null, context.subscriptions);
+
+  vscode.window.onDidChangeTextEditorSelection(() => {
+    resetIdleTimerWithResume();
   }, null, context.subscriptions);
 
   vscode.workspace.onDidChangeConfiguration(event => {
@@ -213,9 +240,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   startTrackingIfFolderOpen();
-
   resetIdleTimer();
-
   setInterval(() => {
     updateStatusBar();
   }, 1000);
