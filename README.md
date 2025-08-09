@@ -1,7 +1,7 @@
 # Folder Time Tracker Extension for VSCodium
 
-[![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)](https://github.com/purplebyte24/timetracker/releases)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/purplebyte24/timetracker/)
+[![Version](https://img.shields.io/badge/version-0.0.2-blue.svg)](https://github.com/purplebyte24/timetracker/releases)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/purplebyte24/timetracker/?tab=MIT-1-ov-file)
 
 
 A simple VSCodium extension to track **active time spent working inside specific folders** in your workspace. Completely local and open-source.
