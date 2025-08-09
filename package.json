@@ -2,6 +2,7 @@
   "name": "folder-time-tracker",
   "displayName": "folder-time-tracker",
   "description": "Tracks time spent in specified folders",
+  "publisher": "PurpleByte24",
   "version": "0.0.2",
   "engines": {
     "vscode": "^1.102.0"
